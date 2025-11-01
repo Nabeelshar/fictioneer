@@ -4512,3 +4512,21 @@ function fictioneer_get_global_page() {
 
   return max( 1, $paged, $page );
 }
+
+// =============================================================================
+// CHECK WHETHER USER CAN EDIT ANY POST TYPES
+// =============================================================================
+
+/**
+ * Return whether the user can edit any post types.
+ *
+ * @since 5.33.0
+ *
+ * @param int $user_id  ID of the user to check.
+ *
+ * @return bool True if the user can edit any post types, false otherwise.
+ */
+
+function fictioneer_user_can_post_any( $user_id ) {
+  return user_can( $user_id, 'edit_posts' ) || user_can( $user_id, 'edit_pages' ) || user_can( $user_id, 'edit_fcn_stories' ) || user_can( $user_id, 'edit_fcn_chapters' ) || user_can( $user_id, 'edit_fcn_collections' ) || user_can( $user_id, 'edit_fcn_recommendations' );
+}

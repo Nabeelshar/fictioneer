@@ -64,6 +64,142 @@ function fictioneer_admin_styles() {
 add_action( 'admin_enqueue_scripts', 'fictioneer_admin_styles' );
 
 // =============================================================================
+// DYNAMIC EDITOR STYLES
+// =============================================================================
+
+/**
+ * Enqueue dynamic editor styles.
+ *
+ * @since 5.33.0
+ */
+
+function fictioneer_dynamic_editor_css() {
+  wp_enqueue_style( 'wp-edit-blocks' );
+
+  $user_id = get_current_user_id();
+
+  $mode = get_the_author_meta( 'fictioneer_enable_editor_dark_colors', $user_id ) ? 'dark' : 'light';
+  $custom_bg = get_the_author_meta( 'fictioneer_editor_background_color', $user_id );
+  $editor_bg = $custom_bg ?: ( $mode === 'dark' ? 'var(--bg-700)' : 'var(--bg-100)' );
+  $hue_offset = (int) get_theme_mod( 'hue_offset_' . $mode, 0 );
+  $saturation_offset = (int) get_theme_mod( 'saturation_offset_' . $mode, 0 );
+  $lightness_offset = (int) get_theme_mod( 'lightness_offset_' . $mode, 0 );
+  $font_saturation_offset = (int) get_theme_mod( 'font_saturation_offset_' . $mode, 0 );
+  $font_lightness_offset = (int) get_theme_mod( 'font_lightness_offset_' . $mode, 0 );
+
+  $css = ":root:is(html){
+    --hue-offset: {$hue_offset}deg;
+    --hue-rotate: 0deg + var(--hue-offset);
+    --saturation-offset: " . $saturation_offset / 100 . ";
+    --saturation: (1 + var(--saturation-offset));
+    --lightness-offset: " . $lightness_offset / 100 . ";
+    --darken: (1 + var(--lightness-offset));
+    --font-saturation-offset: " . $font_saturation_offset / 100 . ";
+    --font-saturation: (1 + var(--font-saturation-offset));
+    --font-lightness-offset: " . $font_lightness_offset / 100 . ";
+    --font-lightness: (1 + var(--font-lightness-offset));
+    "
+    .
+    implode( '', array_map( function( $prop ) use ( $mode ) {
+      return "--bg-{$prop}: " . fictioneer_hsl_code( fictioneer_get_theme_color( "{$mode}_bg_{$prop}" ) ) . ';';
+    }, ['50', '100', '200', '300', '400', '500', '600', '700', '800', '900', '950'] ) )
+    .
+    implode( '', array_map( function( $prop ) use ( $mode ) {
+      return "--fg-{$prop}: " . fictioneer_hsl_font_code( fictioneer_get_theme_color( "{$mode}_fg_{$prop}" ) ) . ';';
+    }, ['100', '200', '300', '400', '500', '600', '700', '800', '900', '950', 'tinted', 'inverted'] ) )
+    .
+    "
+    --primary-400: " . fictioneer_get_theme_color( $mode . '_primary_400' ) . ";
+    --primary-500: " . fictioneer_get_theme_color( $mode . '_primary_500' ) . ";
+    --primary-600: " . fictioneer_get_theme_color( $mode . '_primary_600' ) . ";
+    --red-400: " . fictioneer_get_theme_color( $mode . '_red_400' ) . ";
+    --red-500: " . fictioneer_get_theme_color( $mode . '_red_500' ) . ";
+    --red-600: " . fictioneer_get_theme_color( $mode . '_red_600' ) . ";
+    --green-400: " . fictioneer_get_theme_color( $mode . '_green_400' ) . ";
+    --green-500: " . fictioneer_get_theme_color( $mode . '_green_500' ) . ";
+    --green-600: " . fictioneer_get_theme_color( $mode . '_green_600' ) . ";
+
+    --heading-link-color-hover: var(--fg-200);
+
+    --inline-link-color-hover: var(--primary-400);
+    --inline-link-text-decoration: underline transparent solid 0.05em;
+    --inline-link-text-decoration-hover: underline currentColor solid 0.05em;
+
+    --widget-link-color-hover: var(--fg-200);
+
+    --code-background: rgb(var(--dark-shade-rgb) / 25%);
+    --code-background-inline: rgb(var(--dark-shade-rgb) / 25%);
+    --code-color: var(--fg-700);
+
+    --spoiler-background: var(--bg-100);
+
+    --ins-background: var(--green-400);
+    --ins-color: var(--fg-inverted);
+
+    --del-background: var(--red-400);
+    --del-color: var(--fg-inverted);
+
+    --table-border-color: var(--fg-950);
+    --table-border-color-striped: var(--fg-950);
+    --table-background-striped: rgb(var(--dark-shade-rgb) / 15%);
+
+    --calendar-th-background: var(--bg-800);
+    --calendar-border-color: var(--bg-800);
+    --calendar-color: var(--fg-700);
+
+    --blockquote-background: rgb(var(--dark-shade-rgb) / 15%);
+    --kbd-background: rgb(255 255 255 / 10%);
+    --strong-filter: brightness(1.05);
+    --invert-filter: invert(0);
+
+    --litrpg-background: var(--bg-50);
+    --litrpg-color: var(--fg-inverted);
+    --litrpg-drop-shadow: var(--drop-shadow-m);
+
+    --layout-lineart-color: var(--bg-300);
+    --hr-dots-color: var(--bg-200);
+
+    --button-background-active: var(--bg-100);
+    --button-barberpole: var(--bg-500);
+
+    --button-primary-background: var(--bg-400);
+    --button-primary-background-hover: var(--bg-300);
+    --button-primary-background-disabled: var(--bg-500);
+    --button-primary-color: var(--fg-400);
+    --button-primary-color-hover: var(--fg-300);
+    --button-primary-filter-disabled: saturate(.7) opacity(.3) brightness(1.4);
+
+    --button-secondary-background-hover: var(--bg-500);
+    --button-secondary-background-disabled: repeating-linear-gradient(-45deg, rgb(255 255 255 / 6%), rgb(255 255 255 / 6%) 2px, transparent 2px, transparent 4px);
+    --button-secondary-border: 1px solid var(--bg-300);
+    --button-secondary-border-hover: 1px solid var(--bg-200);
+    --button-secondary-border-disabled: 1px solid var(--bg-300);
+
+    --input-background: rgb(var(--dark-shade-rgb) / 32%);
+    --input-background-disabled: rgb(var(--dark-shade-rgb) / 15%) repeating-linear-gradient(-45deg, rgb(var(--dark-shade-rgb) / 15%), rgb(var(--dark-shade-rgb) / 15%) 2px, transparent 2px, transparent 5px);
+    --input-fill: var(--fg-700);
+    --input-range-thumb: var(--fg-700);
+    --input-range-thumb-hover: var(--fg-300);
+    --input-token-background: var(--bg-500);
+    --input-token-color: var(--fg-400);
+  }";
+
+  $css .= "body.editor-styles-wrapper{
+    background: {$editor_bg};
+    color: var(--fg-500, #000000);
+  }";
+
+  $css .= ':where(h1, h2, h3, h4, h5, h6){color: var(--fg-400);}';
+
+  $css .= ".components-placeholder.components-placeholder{background-color: {$editor_bg};color: var(--fg-500);box-shadow: inset 0 0 0 1px var(--fg-700)}";
+
+  $css .= ".components-button.is-secondary{background: rgb(255 255 255 / 90%);}.components-button.is-secondary:hover:not(:disabled,[aria-disabled=true],.is-pressed){background: color-mix(in srgb,var(--wp-components-color-accent,var(--wp-admin-theme-color,#3858e9)) 4%, rgb(255 255 255 / 95%))}";
+
+  wp_add_inline_style( 'wp-edit-blocks', fictioneer_minify_css( $css ) );
+};
+add_action( 'enqueue_block_editor_assets', 'fictioneer_dynamic_editor_css' );
+
+// =============================================================================
 // ENQUEUE ADMIN SCRIPTS
 // =============================================================================
 

@@ -1838,7 +1838,7 @@ add_action( 'wp_head', 'fictioneer_output_head_meta', 1 );
 
 if ( ! function_exists( 'fictioneer_output_head_fonts' ) ) {
   /**
-   * Outputs font stylesheets in the <head>
+   * Output font stylesheets in the <head>.
    *
    * Note: This function should be kept pluggable due to legacy reasons.
    *

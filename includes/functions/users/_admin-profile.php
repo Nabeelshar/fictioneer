@@ -337,7 +337,7 @@ add_action( 'edit_user_profile_update', 'fictioneer_update_admin_user_profile' )
 // =============================================================================
 
 /**
- * Update user sections of the wp-admin user profile
+ * Update user sections of the wp-admin user profile.
  *
  * Only the respective user or an administrator can update these fields.
  *
@@ -424,6 +424,24 @@ function fictioneer_update_my_user_profile( $updated_user_id ) {
         $updated_user_id,
         'fictioneer_show_read_alerts',
         fictioneer_sanitize_checkbox( $_POST['fictioneer_show_read_alerts'] ?? 0 )
+      );
+    }
+
+    // Editor dark mode colors?
+    if ( isset( $_POST['fictioneer_enable_editor_dark_colors'] ) ) {
+      fictioneer_update_user_meta(
+        $updated_user_id,
+        'fictioneer_enable_editor_dark_colors',
+        fictioneer_sanitize_checkbox( $_POST['fictioneer_enable_editor_dark_colors'] ?? 0 )
+      );
+    }
+
+    // Editor background color?
+    if ( isset( $_POST['fictioneer_editor_background_color'] ) ) {
+      fictioneer_update_user_meta(
+        $updated_user_id,
+        'fictioneer_editor_background_color',
+        sanitize_hex_color( $_POST['fictioneer_editor_background_color'] ?? '' )
       );
     }
   }
@@ -1056,7 +1074,7 @@ add_action( 'fictioneer_admin_user_sections', 'fictioneer_admin_profile_fields_f
 // =============================================================================
 
 /**
- * Renders HTML for the Profile Flags section in the wp-admin user profile
+ * Render HTML for the Profile Flags section in the wp-admin user profile.
  *
  * @since 5.2.5
  *
@@ -1193,6 +1211,62 @@ function fictioneer_admin_profile_fields_flags( $profile_user ) {
   <?php // <--- End HTML
 }
 add_action( 'fictioneer_admin_user_sections', 'fictioneer_admin_profile_fields_flags', 6 );
+
+// =============================================================================
+// SHOW EDITOR SETTINGS
+// =============================================================================
+
+/**
+ * Render HTML for the Editor Settings section in the wp-admin user profile.
+ *
+ * @since 5.33.0
+ *
+ * @param WP_User $profile_user  The profile user object. Not necessarily the one
+ *                               currently editing the profile!
+ */
+
+function fictioneer_admin_editor_settings( $profile_user ) {
+  // Setup
+  $sender_is_admin = fictioneer_is_admin( get_current_user_id() );
+  $sender_is_owner = $profile_user->ID === get_current_user_id();
+
+  // Guard
+  if ( ! $sender_is_admin && ! $sender_is_owner ) {
+    return;
+  }
+
+  if ( ! fictioneer_user_can_post_any( $profile_user->ID ) ) {
+    return;
+  }
+
+  // --- Start HTML ---> ?>
+  <tr class="user-fictioneer-editor-settings-wrap">
+    <th><?php _e( 'Editor Settings', 'fictioneer' ); ?></th>
+    <td>
+      <fieldset>
+        <div class="profile__input-wrapper profile__input-wrapper--checkbox">
+          <label for="fictioneer_enable_editor_dark_colors" class="checkbox-group">
+            <input type="hidden" name="fictioneer_enable_editor_dark_colors" value="0">
+            <input
+              name="fictioneer_enable_editor_dark_colors"
+              type="checkbox"
+              id="fictioneer_enable_editor_dark_colors"
+              value="1"
+              <?php echo checked( 1, get_the_author_meta( 'fictioneer_enable_editor_dark_colors', $profile_user->ID ), false ); ?>
+            >
+            <span><?php _e( 'Switch to dark mode colors', 'fictioneer' ); ?></span>
+          </label>
+        </div>
+        <div class="profile__input-wrapper" style="margin-top: 1em;">
+          <input name="fictioneer_editor_background_color" type="text" id="fictioneer_editor_background_color" value="<?php echo esc_attr( get_the_author_meta( 'fictioneer_editor_background_color', $profile_user->ID ) ); ?>" class="regular-text" placeholder="#ffffff">
+          <p class="description"><?php _e( 'Editor background color (leave blank for default).', 'fictioneer' ); ?></p>
+        </div>
+      </fieldset>
+    </td>
+  </tr>
+  <?php // <--- End HTML
+}
+add_action( 'fictioneer_admin_user_sections', 'fictioneer_admin_editor_settings', 6 );
 
 // =============================================================================
 // SHOW OAUTH
