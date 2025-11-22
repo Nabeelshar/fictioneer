@@ -10,6 +10,10 @@
     padding: .5rem 8px .5rem 6px;
   }
 
+  :is(.chapter-group__name, .story__scheduled-chapter) {
+    padding-left: 6px;
+  }
+
   .story__blog-list-item {
     padding: .5rem 8px;
   }

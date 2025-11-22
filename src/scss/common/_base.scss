@@ -687,7 +687,7 @@ html:not(.logged-in) body:not(.logged-in) {
     font-size: var(--fs-dxs);
     font-weight: var(--font-weight-semi-strong);
     letter-spacing: calc(0.02em + var(--font-letter-spacing-base));
-    padding: 16px 6px;
+    padding: 16px 0 16px 1px;
     width: 100%;
 
     &::after {
