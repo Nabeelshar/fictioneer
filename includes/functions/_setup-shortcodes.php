@@ -2732,32 +2732,27 @@ function fictioneer_shortcode_calendar( $attr ) {
     .fcn-calendar .day-content {
       display: flex;
       flex-wrap: wrap;
-      gap: 2px;
       justify-content: center;
-      align-items: center;
-      min-height: 60px;
       align-content: center;
-      padding-bottom: 4px;
+      padding: 2px;
+      min-height: 80px;
     }
     .fcn-calendar .post-item {
-      --base-w: 36px;
-      --min-w: 12px;
-      width: clamp(var(--min-w), calc(var(--base-w) - ((var(--total) - 1) * 2px)), var(--base-w));
+      width: 32px;
       aspect-ratio: 2/3;
+      border-radius: 3px;
+      margin: -8px -6px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+      transition: transform 0.2s, z-index 0s;
       position: relative;
-      display: block;
-      border-radius: 2px;
-      overflow: hidden;
-      box-shadow: 0 1px 2px rgba(0,0,0,0.3);
-      transition: transform 0.15s ease-out, z-index 0s;
       z-index: 1;
-      flex-shrink: 0;
+      cursor: pointer;
     }
     .fcn-calendar .post-item:hover {
-      transform: scale(3.5);
+      transform: scale(2.5);
       z-index: 100;
       box-shadow: 0 5px 15px rgba(0,0,0,0.5);
-      border-radius: 3px;
+      border-radius: 4px;
     }
     .fcn-calendar .post-item:hover {
       transform: scale(1.1);
