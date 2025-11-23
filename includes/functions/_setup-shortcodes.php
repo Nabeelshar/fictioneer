@@ -2729,29 +2729,39 @@ function fictioneer_shortcode_calendar( $attr ) {
       color: var(--fg-500, #666);
     }
     .fcn-calendar .day-content {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 4px;
-      justify-content: center;
-      max-height: 120px;
-      overflow-y: auto;
-      scrollbar-width: thin;
+      height: 80px;
+      perspective: 600px;
+      position: relative;
+      z-index: 1;
     }
-    .fcn-calendar .day-content::-webkit-scrollbar {
-      width: 3px;
+    .fcn-calendar .day-carousel {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      transform-style: preserve-3d;
+      animation: fcn-spin 20s infinite linear;
     }
-    .fcn-calendar .day-content::-webkit-scrollbar-thumb {
-      background-color: var(--bg-400, #ccc);
+    .fcn-calendar .day-content:hover .day-carousel {
+      animation-play-state: paused;
+      z-index: 10;
     }
     .fcn-calendar .post-item {
-      width: 36px;
-      height: 36px;
-      position: relative;
+      width: 30px;
+      height: 45px;
+      position: absolute;
+      left: 50%;
+      top: 10px;
+      margin-left: -15px;
       display: block;
-      border-radius: 50%;
+      border-radius: 3px;
       overflow: hidden;
       box-shadow: 0 1px 3px rgba(0,0,0,0.2);
-      transition: transform 0.2s;
+      backface-visibility: visible;
+      transform: rotateY(calc(var(--i) * (360deg / var(--total)))) translateZ(35px);
+    }
+    @keyframes fcn-spin {
+      from { transform: rotateY(0deg); }
+      to { transform: rotateY(360deg); }
     }
     .fcn-calendar .post-item:hover {
       transform: scale(1.1);
@@ -2830,8 +2840,10 @@ function fictioneer_shortcode_calendar( $attr ) {
             echo '<span class="day-number">' . $current_day . '</span>';
 
             if ( isset( $posts_by_day[ $current_day ] ) ) {
-              echo '<div class="day-content">';
-              foreach ( $posts_by_day[ $current_day ] as $post ) {
+              $day_posts = $posts_by_day[ $current_day ];
+              $total_posts = count( $day_posts );
+              echo '<div class="day-content"><div class="day-carousel" style="--total: ' . $total_posts . ';">';
+              foreach ( $day_posts as $index => $post ) {
                 // Setup
                 $is_chapter = $post->post_type === 'fcn_chapter';
                 $story_id = $is_chapter ? fictioneer_get_chapter_story_id( $post->ID ) : 0;
@@ -2857,11 +2869,11 @@ function fictioneer_shortcode_calendar( $attr ) {
                    $thumb = '<span class="no-thumb" title="' . esc_attr( $title ) . '"><i class="fa-solid fa-book"></i></span>';
                 }
 
-                echo '<a href="' . $link . '" class="post-item" title="' . esc_attr( $title ) . '">';
+                echo '<a href="' . $link . '" class="post-item" style="--i: ' . $index . ';" title="' . esc_attr( $title ) . '">';
                 echo $thumb;
                 echo '</a>';
               }
-              echo '</div>';
+              echo '</div></div>';
             }
 
             echo '</td>';
