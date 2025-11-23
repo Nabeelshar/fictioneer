@@ -2741,22 +2741,19 @@ function fictioneer_shortcode_calendar( $attr ) {
       width: 32px;
       aspect-ratio: 2/3;
       border-radius: 3px;
-      margin: -8px -6px;
+      margin: -12px -10px;
       box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-      transition: transform 0.2s, z-index 0s;
+      transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), z-index 0s;
       position: relative;
       z-index: 1;
       cursor: pointer;
+      background-color: var(--bg-200, #f0f0f0);
     }
     .fcn-calendar .post-item:hover {
-      transform: scale(2.5);
-      z-index: 100;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+      transform: scale(3);
+      z-index: 1000;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
       border-radius: 4px;
-    }
-    .fcn-calendar .post-item:hover {
-      transform: scale(1.1);
-      z-index: 5;
     }
     .fcn-calendar .post-item img {
       width: 100%;
