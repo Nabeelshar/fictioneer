@@ -1194,13 +1194,20 @@ function fictioneer_register_chapter_meta_fields() {
           return '0';
         }
 
+        $user_id = get_current_user_id();
+
+        if ( ! $user_id || wp_doing_cron() ) {
+          return strval( $meta_value );
+        }
+
         if ( get_option( 'fictioneer_limit_chapter_stories_by_author' ) ) {
-          $user_id = get_current_user_id();
+          $co_authored_ids = fictioneer_sql_get_co_authored_story_ids( $user_id );
 
           if (
             $story_author_id != $user_id &&
-            ! ( user_can( $user_id, 'manage_options' ) || user_can( $user_id, 'fcn_crosspost' ) ) &&
-            ! in_array( $meta_value, fictioneer_sql_get_co_authored_story_ids( $user_id ) )
+            ! user_can( $user_id, 'manage_options' ) &&
+            ! user_can( $user_id, 'fcn_crosspost' ) &&
+            ! in_array( $meta_value, $co_authored_ids )
           ) {
             return '0';
           }
