@@ -2717,7 +2717,8 @@ function fictioneer_shortcode_calendar( $attr ) {
       padding: 10px 5px;
     }
     .fcn-calendar td {
-      height: 100px;
+      height: auto;
+      min-height: 100px;
       background-color: var(--bg-100, #fff);
       position: relative;
     }
@@ -2734,8 +2735,9 @@ function fictioneer_shortcode_calendar( $attr ) {
       gap: 2px;
       justify-content: center;
       align-items: center;
-      height: 100%;
+      min-height: 60px;
       align-content: center;
+      padding-bottom: 4px;
     }
     .fcn-calendar .post-item {
       --base-w: 36px;
@@ -2795,8 +2797,8 @@ function fictioneer_shortcode_calendar( $attr ) {
       margin-bottom: 5px;
     }
     @media (max-width: 600px) {
-       .fcn-calendar .post-item { width: 28px; height: 28px; }
-       .fcn-calendar td { height: 80px; }
+       .fcn-calendar .post-item { width: 28px; height: auto; }
+       .fcn-calendar td { height: auto; min-height: 80px; }
     }
   </style>
   <div class="fcn-calendar-wrapper <?php echo $classes; ?>">
