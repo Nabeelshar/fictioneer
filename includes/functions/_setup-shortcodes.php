@@ -2741,18 +2741,20 @@ function fictioneer_shortcode_calendar( $attr ) {
       height: 100%;
       padding: 16px 4px 4px 4px;
       box-sizing: border-box;
+      line-height: 0;
     }
     .fcn-calendar .post-item {
-      width: clamp(10px, 34px - (var(--total) * 0.6px), 32px);
+      width: clamp(8px, 32px - (var(--total) * 0.5px), 32px);
       aspect-ratio: 2/3;
       border-radius: 3px;
-      margin: clamp(-12px, -2px - (var(--total) * 0.4px), -2px);
+      margin: clamp(-16px, -1px - (var(--total) * 0.5px), -1px);
       box-shadow: 0 2px 4px rgba(0,0,0,0.3);
       transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), z-index 0s;
       position: relative;
       z-index: 1;
       cursor: pointer;
       background-color: var(--bg-200, #f0f0f0);
+      flex-shrink: 0;
     }
     .fcn-calendar .post-item:hover {
       transform: scale(3);
