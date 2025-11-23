@@ -446,7 +446,7 @@ Recommendations are added under **Recommendations > Add New**. Required fields a
 
 ### Example Sentences
 
-Think of the sentence as elevator pitch, something you can tell within a few seconds to get the point across. Skip the details, hint at the plot, describe the concept — the story has all the time to tell itself later. Because more often than not, readers will only glimpse at a story while browsing. Recommendations are not prominently featured on _your_ site, after all.
+Think of the sentence as elevator pitch, something you can tell within a few seconds to get the point across. Skip the details, hint at the plot, describe the concept — the story has all the time to tell itself later. Recommendations are not prominently featured on _your_ site, after all.
 
 > Rebellious heiress and her genius friend commit high-tech heists in a doomed city on the edge of tomorrow.
 
@@ -964,6 +964,31 @@ Renders a multi-column grid of small bookmark cards, ordered by date of creation
 
 ![Bookmarks](repo/assets/shortcode_example_bookmarks.jpg?raw=true)
 
+### Calendar Shortcode
+
+The `[fictioneer_calendar]` shortcode displays a monthly calendar with scheduled and published stories or chapters.
+
+**Attributes:**
+* `month` (int) - The month number (1-12). Defaults to current month.
+* `year` (int) - The year (4 digits). Defaults to current year.
+* `post_type` (string) - Comma-separated list of post types. Defaults to `fcn_story,fcn_chapter`.
+* `post_status` (string) - Comma-separated list of post statuses. Defaults to `future,publish`.
+* `include_updates` (bool) - If true, includes chapters even if `fcn_chapter` is not in `post_type`, displaying them as story updates. Defaults to false.
+* `class` (string) - Additional CSS classes.
+
+**Examples:**
+
+```html
+<!-- Default calendar -->
+[fictioneer_calendar]
+
+<!-- Specific month -->
+[fictioneer_calendar month="12" year="2025"]
+
+<!-- Only stories, but include chapter updates as story entries -->
+[fictioneer_calendar post_type="fcn_story" include_updates="true"]
+```
+
 ### Chapter List
 
 Renders a list of chapters identical to those on story pages, ordered by sequence in the source. Must have either the **story_id** or **chapter_ids** parameter, but not both.
@@ -1068,7 +1093,6 @@ Renders a multi-column grid of small cards, showing the latest four chapters ord
 * **footer_comments:** Whether to show the chapter comment count (not in `list`). Default `true`.
 * **footer_status:** Whether to show the chapter story status. Default `true`.
 * **footer_rating:** Whether to show the chapter age rating. Default `true`.
-* **aspect_ratio:** CSS [aspect-ratio](https://developer.mozilla.org/en-US/docs/Web/CSS/aspect-ratio) value for the image (X/Y; vertical only). Default `3/1`.
 * **class:** Additional CSS classes, separated by whitespace.
 * **splide:** Configuration JSON to turn the grid into a slider. See [Slider](#slider).
 * **cache:** Whether the shortcode should be cached. Default `true`.
@@ -1449,7 +1473,7 @@ If you do not want to initialize a slider on page load, you can add the `no-auto
 
 #### Custom HTML Sliders
 
-If you enable Splide globally (or have a slider shortcode on the same page), you can use the HTML block to create your own Slider. Just copy the base [structure](https://splidejs.com/guides/structure/) and add any slides you like, although you will need to style them yourself using custom CSS. Initialize the slider with the [data attribute JSON](https://splidejs.com/guides/options/#by-data-attribute), but this time with double quotes as shown in the example. Unlike with shortcodes, navigation arrows are enabled by default but can be turned off with `"arrows:" false`.
+If you enable Splide globally (or have a slider shortcode on the same page), you can use the HTML block to create your own Slider. Just copy the base [structure](https://splidejs.com/guides/structure/) and add any slides you like, although you will need to style them yourself using custom CSS. Initialize the slider with the [data attribute JSON](https://splidejs.com/guides/options/#by-data-attribute), but this time with double quotes as shown in the example. Unlike with shortcodes, navigation arrows are enabled by default but can be turned off with `"arrows": false`.
 
 ```html
 <section class="splide" data-splide='{"type": "loop", "interval": 3000, "gap": "1.5rem", "autoplay": true, "perPage": 3, "breakpoints": {"767": {"perPage": 2, "arrows": false}, "479": {"perPage": 1}}}'>

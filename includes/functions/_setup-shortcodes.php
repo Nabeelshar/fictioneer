@@ -775,20 +775,14 @@ add_shortcode( 'fictioneer_latest_stories', 'fictioneer_shortcode_latest_stories
  * @param string|null $attr['aspect_ratio']        Optional. Aspect ratio for the image. Only with vertical.
  * @param string|null $attr['lightbox']            Optional. Whether the thumbnail is opened in the lightbox. Default true.
  * @param string|null $attr['thumbnail']           Optional. Whether to show the thumbnail. Default true (Customizer).
- * @param string|null $attr['words']               Optional. Whether to show the word count of chapter items. Default true.
- * @param string|null $attr['date']                Optional. Whether to show the date of chapter items. Default true.
  * @param string|null $attr['date_format']         Optional. String to override the date format. Default empty.
- * @param string|null $attr['nested_date_format']  Optional. String to override any nested date formats. Default empty.
- * @param string|null $attr['terms']               Optional. Either 'inline', 'pills', 'none', or 'false' (only in list type).
- *                                                 Default 'inline'.
- * @param string|null $attr['max_terms']           Optional. Maximum number of shown taxonomies. Default 10.
  * @param string|null $attr['footer']              Optional. Whether to show the footer (if any). Default true.
  * @param string|null $attr['footer_author']       Optional. Whether to show the story author. Default true.
  * @param string|null $attr['footer_date']         Optional. Whether to show the story date. Default true.
  * @param string|null $attr['footer_words']        Optional. Whether to show the story word count. Default true.
  * @param string|null $attr['footer_chapters']     Optional. Whether to show the story chapter count. Default true.
  * @param string|null $attr['footer_status']       Optional. Whether to show the story status. Default true.
- * @param string|null $attr['footer_rating']       Optional. Whether to show the story/chapter age rating. Default true.
+ * @param string|null $attr['footer_rating']       Optional. Whether to show the story age rating. Default true.
  * @param string|null $attr['footer_comments']     Optional. Whether to show the post comment count. Default false.
  * @param string|null $attr['class']               Optional. Additional CSS classes, separated by whitespace.
  * @param string|null $args['splide']              Configuration JSON for the Splide slider. Default empty.
@@ -813,7 +807,7 @@ function fictioneer_shortcode_latest_story_updates( $attr ) {
 
   // Extra classes
   if ( $args['splide'] ?? 0 ) {
-    $args['classes'] .= ' splide _splide-placeholder ';
+    $args['classes'] .= ' splide _splide-placeholder';
   }
 
   // Transient?
@@ -2241,8 +2235,8 @@ add_shortcode( 'fictioneer_story_comments', 'fictioneer_shortcode_story_comments
  * @param string|null $attr['tag']          Optional. The wrapper HTML tag. Defaults to 'span'.
  * @param string|null $attr['class']        Optional. Additional CSS classes, separated by whitespace.
  * @param string|null $attr['inner_class']  Optional. Additional CSS classes for nested items, separated by whitespace.
- * @param string|null $attr['style']        Optional. Inline style applied to wrapper element.
- * @param string|null $attr['inner_style']  Optional. Inline style applied to nested items.
+ * @param string|null $attr['style']        Optional. Inline section CSS style. Default empty.
+ * @param string|null $attr['inner_style']  Optional. Inline term CSS style. Default empty.
  *
  * @return string The shortcode HTML.
  */
@@ -2614,3 +2608,268 @@ function fictioneer_shortcode_terms( $attr ) {
   );
 }
 add_shortcode( 'fictioneer_terms', 'fictioneer_shortcode_terms' );
+
+// =============================================================================
+// CALENDAR SHORTCODE
+// =============================================================================
+
+/**
+ * Shortcode to show a calendar with scheduled/published posts.
+ *
+ * @since 6.0.0
+ *
+ * @param string|null $attr['month']       Optional. Month number (1-12). Default current.
+ * @param string|null $attr['year']        Optional. Year (4 digits). Default current.
+ * @param string|null $attr['post_type']   Optional. Post types. Default 'fcn_story,fcn_chapter'.
+ * @param string|null $attr['post_status'] Optional. Post statuses. Default 'future,publish'.
+ * @param string|null $attr['class']       Optional. Additional CSS classes.
+ *
+ * @return string The captured shortcode HTML.
+ */
+
+function fictioneer_shortcode_calendar( $attr ) {
+  // Defaults
+  $current_year = current_time( 'Y' );
+  $current_month = current_time( 'm' );
+
+  $attr = shortcode_atts( array(
+    'month' => $current_month,
+    'year' => $current_year,
+    'post_type' => 'fcn_story,fcn_chapter',
+    'post_status' => 'future,publish',
+    'include_updates' => 0,
+    'class' => '',
+  ), $attr, 'fictioneer_calendar' );
+
+  $year = intval( $attr['year'] );
+  $month = intval( $attr['month'] );
+  $post_types = explode( ',', $attr['post_type'] );
+  $post_statuses = explode( ',', $attr['post_status'] );
+  $include_updates = filter_var( $attr['include_updates'], FILTER_VALIDATE_BOOLEAN );
+  $classes = esc_attr( $attr['class'] );
+
+  // Include chapters if updates are requested but chapters are not in post_type
+  $query_post_types = $post_types;
+  if ( $include_updates && in_array( 'fcn_story', $query_post_types ) && ! in_array( 'fcn_chapter', $query_post_types ) ) {
+    $query_post_types[] = 'fcn_chapter';
+  }
+
+  // Calculate days in month
+  $days_in_month = cal_days_in_month( CAL_GREGORIAN, $month, $year );
+  $first_day_timestamp = mktime( 0, 0, 0, $month, 1, $year );
+  $start_of_week = get_option( 'start_of_week' );
+  $first_day_w = date( 'w', $first_day_timestamp );
+  $offset = ( $first_day_w - $start_of_week + 7 ) % 7;
+
+  // Query posts
+  $args = array(
+    'post_type' => $query_post_types,
+    'post_status' => $post_statuses,
+    'posts_per_page' => -1,
+    'date_query' => array(
+      array(
+        'year' => $year,
+        'month' => $month,
+      ),
+    ),
+  );
+
+  $query = new WP_Query( $args );
+  $posts_by_day = array();
+
+  if ( $query->have_posts() ) {
+    while ( $query->have_posts() ) {
+      $query->the_post();
+      $day = intval( get_the_date( 'j' ) );
+      if ( ! isset( $posts_by_day[ $day ] ) ) {
+        $posts_by_day[ $day ] = array();
+      }
+      $posts_by_day[ $day ][] = get_post();
+    }
+    wp_reset_postdata();
+  }
+
+  // Build HTML
+  ob_start();
+  ?>
+  <style>
+    .fcn-calendar-wrapper {
+      margin-bottom: 1.5rem;
+    }
+    .fcn-calendar-controls {
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+    .fcn-calendar {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+      font-size: 0.9em;
+    }
+    .fcn-calendar th, .fcn-calendar td {
+      border: 1px solid var(--borders-500, #ccc);
+      padding: 5px;
+      vertical-align: top;
+    }
+    .fcn-calendar th {
+      background-color: var(--bg-300, #eee);
+      text-align: center;
+      padding: 10px 5px;
+    }
+    .fcn-calendar td {
+      height: 100px;
+      background-color: var(--bg-100, #fff);
+      position: relative;
+    }
+    .fcn-calendar .day-number {
+      font-weight: bold;
+      margin-bottom: 5px;
+      display: block;
+      text-align: right;
+      color: var(--fg-500, #666);
+    }
+    .fcn-calendar .day-content {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      justify-content: center;
+    }
+    .fcn-calendar .post-item {
+      width: 32px;
+      height: 48px;
+      position: relative;
+      display: block;
+      border-radius: 3px;
+      overflow: hidden;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+      transition: transform 0.2s;
+    }
+    .fcn-calendar .post-item:hover {
+      transform: scale(1.1);
+      z-index: 5;
+    }
+    .fcn-calendar .post-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .fcn-calendar .post-item .no-thumb {
+      display: flex;
+      width: 100%;
+      height: 100%;
+      background: var(--bg-300, #ddd);
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      color: var(--fg-300, #999);
+    }
+    .fcn-calendar .post-item:hover::after {
+      content: attr(title);
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--bg-900, #000);
+      color: var(--fg-100, #fff);
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      white-space: nowrap;
+      z-index: 100;
+      pointer-events: none;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+      margin-bottom: 5px;
+    }
+    @media (max-width: 600px) {
+       .fcn-calendar .post-item { width: 24px; height: 36px; }
+       .fcn-calendar td { height: 80px; }
+    }
+  </style>
+  <div class="fcn-calendar-wrapper <?php echo $classes; ?>">
+    <div class="fcn-calendar-controls">
+       <h3 class="h4"><?php echo date_i18n( 'F Y', mktime( 0, 0, 0, $month, 1, $year ) ); ?></h3>
+    </div>
+    <table class="fcn-calendar">
+      <thead>
+        <tr>
+          <?php
+          global $wp_locale;
+          for ( $i = 0; $i < 7; $i++ ) {
+            $day_index = ( $start_of_week + $i ) % 7;
+            echo '<th>' . $wp_locale->get_weekday_abbrev( $wp_locale->get_weekday( $day_index ) ) . '</th>';
+          }
+          ?>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <?php
+          // Empty cells before first day
+          for ( $i = 0; $i < $offset; $i++ ) {
+            echo '<td class="pad">&nbsp;</td>';
+          }
+
+          $current_day = 1;
+          while ( $current_day <= $days_in_month ) {
+            // Start new row if needed
+            if ( ( $current_day + $offset - 1 ) % 7 == 0 && $current_day != 1 ) {
+              echo '</tr><tr>';
+            }
+
+            echo '<td>';
+            echo '<span class="day-number">' . $current_day . '</span>';
+
+            if ( isset( $posts_by_day[ $current_day ] ) ) {
+              echo '<div class="day-content">';
+              foreach ( $posts_by_day[ $current_day ] as $post ) {
+                // Setup
+                $is_chapter = $post->post_type === 'fcn_chapter';
+                $story_id = $is_chapter ? fictioneer_get_chapter_story_id( $post->ID ) : 0;
+                $is_update_proxy = $is_chapter && $include_updates && ! in_array( 'fcn_chapter', $post_types );
+
+                // Determine Title and Link
+                if ( $is_update_proxy && $story_id ) {
+                  $title = get_the_title( $story_id );
+                  $link = get_permalink( $story_id );
+                } else {
+                  $title = get_the_title( $post );
+                  $link = get_permalink( $post );
+                }
+
+                // Determine Thumbnail
+                $thumb = get_the_post_thumbnail( $post, 'thumbnail', array( 'title' => $title ) );
+
+                if ( ! $thumb && $story_id ) {
+                  $thumb = get_the_post_thumbnail( $story_id, 'thumbnail', array( 'title' => $title ) );
+                }
+
+                if ( ! $thumb ) {
+                   $thumb = '<span class="no-thumb" title="' . esc_attr( $title ) . '"><i class="fa-solid fa-book"></i></span>';
+                }
+
+                echo '<a href="' . $link . '" class="post-item" title="' . esc_attr( $title ) . '">';
+                echo $thumb;
+                echo '</a>';
+              }
+              echo '</div>';
+            }
+
+            echo '</td>';
+            $current_day++;
+          }
+
+          // Empty cells after last day
+          $remaining_days = ( 7 - ( ( $days_in_month + $offset ) % 7 ) ) % 7;
+          for ( $i = 0; $i < $remaining_days; $i++ ) {
+            echo '<td class="pad">&nbsp;</td>';
+          }
+          ?>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <?php
+  return fictioneer_minify_html( ob_get_clean() );
+}
+add_shortcode( 'fictioneer_calendar', 'fictioneer_shortcode_calendar' );
