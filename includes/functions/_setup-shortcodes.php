@@ -2744,11 +2744,11 @@ function fictioneer_shortcode_calendar( $attr ) {
       background-color: var(--bg-400, #ccc);
     }
     .fcn-calendar .post-item {
-      width: 32px;
-      height: 48px;
+      width: 36px;
+      height: 36px;
       position: relative;
       display: block;
-      border-radius: 3px;
+      border-radius: 50%;
       overflow: hidden;
       box-shadow: 0 1px 3px rgba(0,0,0,0.2);
       transition: transform 0.2s;
@@ -2791,7 +2791,7 @@ function fictioneer_shortcode_calendar( $attr ) {
       margin-bottom: 5px;
     }
     @media (max-width: 600px) {
-       .fcn-calendar .post-item { width: 24px; height: 36px; }
+       .fcn-calendar .post-item { width: 28px; height: 28px; }
        .fcn-calendar td { height: 80px; }
     }
   </style>
