@@ -2733,6 +2733,15 @@ function fictioneer_shortcode_calendar( $attr ) {
       flex-wrap: wrap;
       gap: 4px;
       justify-content: center;
+      max-height: 120px;
+      overflow-y: auto;
+      scrollbar-width: thin;
+    }
+    .fcn-calendar .day-content::-webkit-scrollbar {
+      width: 3px;
+    }
+    .fcn-calendar .day-content::-webkit-scrollbar-thumb {
+      background-color: var(--bg-400, #ccc);
     }
     .fcn-calendar .post-item {
       width: 32px;
